@@ -7,7 +7,7 @@ const getRelativeMousePosition = (event, element) => {
 
 const creatNewBlock = (
   element,
-  event,
+  target,
   targetReleativeMousePostion,
   dragElementClickPosition
 ) => {
@@ -32,7 +32,8 @@ const creatNewBlock = (
     targetReleativeMousePostion.y - dragElementClickPosition.y
   }px`;
 
-  event.target.appendChild(newNode);
+  target.appendChild(newNode);
+  return newNode;
 };
 
 const moveBlock = (
@@ -49,6 +50,58 @@ const moveBlock = (
   }px`;
 
   event.target.appendChild(element);
+};
+
+const snapNewBlock = (
+  element,
+  canvas,
+  targetReleativeMousePostion,
+  dragElementClickPosition
+) => {
+  const newNode = element.cloneNode(true);
+  newNode.classList.add("block");
+  newNode.classList.remove("template");
+  newNode.classList.remove("dragging");
+
+  const dragAreaContainer = document.createElement("div");
+  dragAreaContainer.classList.add("drag-area-container");
+  const dragArea = document.createElement("div");
+  dragArea.classList.add("drag-area");
+  dragArea.setAttribute("id", "drag-area");
+  dragAreaContainer.appendChild(dragArea);
+
+  newNode.appendChild(dragAreaContainer);
+
+  // left = parent.x
+
+  newNode.style.left = `${
+    targetReleativeMousePostion.x - dragElementClickPosition.x
+  }px`;
+  newNode.style.top = `${
+    targetReleativeMousePostion.y - dragElementClickPosition.y
+  }px`;
+
+  canvas.appendChild(newNode);
+};
+
+const computeNewBlock = (element, parent, canvas) => {
+  const elementWidth = parseInt(window.getComputedStyle(element).width);
+  const elementHeight = parseInt(window.getComputedStyle(element).height);
+  return {
+    parent,
+    childwidth: 0,
+    id: 0,
+    x:
+      element.getBoundingClientRect().left +
+      elementWidth / 2 -
+      canvas.getBoundingClientRect().left,
+    y:
+      element.getBoundingClientRect().top +
+      elementHeight / 2 -
+      canvas.getBoundingClientRect().top,
+    width: elementWidth,
+    height: elementHeight,
+  };
 };
 
 const initFlow = (canvasId) => {
@@ -133,15 +186,13 @@ const initFlow = (canvasId) => {
 
         if (!rearrange) {
           if (blocks.length === 0) {
-            creatNewBlock(
+            const newNode = creatNewBlock(
               draggedElement,
-              event,
+              event.target,
               targetReleativeMousePostion,
               dragElementClickPosition
             );
-            blocks.push({
-              id: 1,
-            });
+            blocks.push(computeNewBlock(newNode, parent, canvas));
           }
         } else {
           moveBlock(
@@ -155,24 +206,26 @@ const initFlow = (canvasId) => {
       }
 
       if (event.target.id === "drag-area") {
-        const parentBlock = event.target.parentElement.parentElement;
-        parentBlock.classList.remove("show-indicator");
+        if (!rearrange) {
+          const parentBlock = event.target.parentElement.parentElement;
+          parentBlock.classList.remove("show-indicator");
 
-        const targetReleativeMousePostion = getRelativeMousePosition(
-          event,
-          canvas
-        );
+          const targetReleativeMousePostion = getRelativeMousePosition(
+            event,
+            canvas
+          );
 
-        creatNewBlock(
-          draggedElement,
-          {target: canvas},
-          targetReleativeMousePostion,
-          dragElementClickPosition
-        );
+          snapNewBlock(
+            draggedElement,
+            canvas,
+            targetReleativeMousePostion,
+            dragElementClickPosition
+          );
 
-        blocks.push({
-          id: 2,
-        });
+          blocks.push({
+            id: 2,
+          });
+        }
       }
     },
     false

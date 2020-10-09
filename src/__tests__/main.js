@@ -76,7 +76,7 @@ describe("Testing dragging events", () => {
       expect(child.className).not.toContain("dragging");
     });
 
-    test("dragging an existing element to canvas not creating a new block", () => {
+    test("dragging an existing element to canvas doesn't create a new block", () => {
       const initalCanvasChildren = canvas.children.length;
       const canvasDragElement = canvas.children[0];
 
@@ -88,7 +88,7 @@ describe("Testing dragging events", () => {
   });
 
   describe("dragging second element", () => {
-    test("dragging and dropping a new element to canvas does not append child", () => {
+    test("dragging and dropping a new element to canvas does not create a new block", () => {
       expect(canvas.children.length).toBe(1);
 
       fireCustomEvent("dragstart", dragElement);
@@ -108,11 +108,20 @@ describe("Testing dragging events", () => {
     });
 
     test("dragging and dropping over a drag area creates new block in canvas", () => {
-      const currentBlocksLength = canvas.children.length;
+      const initalCanvasChildren = canvas.children.length;
       const canvasBlockChild = canvas.children[0];
       fireCustomEvent("dragstart", dragElement);
       fireCustomEvent("drop", canvasBlockChild.querySelector("#drag-area"));
-      expect(canvas.children.length).toBe(currentBlocksLength + 1);
+      expect(canvas.children.length).toBe(initalCanvasChildren + 1);
+    });
+
+    test("dragging an existing block to drag area doesn't create a new block", () => {
+      const initalCanvasChildren = canvas.children.length;
+      const canvasBlockFirstChild = canvas.children[0];
+      const canvasBlockSecondChild = canvas.children[1];
+      fireCustomEvent("dragstart", canvasBlockSecondChild);
+      fireCustomEvent("drop", canvasBlockFirstChild.querySelector("#drag-area"));
+      expect(canvas.children.length).toBe(initalCanvasChildren);
     });
   });
 });
