@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dragging </title>
+  <link rel="stylesheet" href="./index.css">
+</head>
+
+<body>
+  <div class="blocks">
+    <div class="dropzone">
+      <div id="draggable" draggable="true" ondragstart="event.dataTransfer.setData('text/plain',null)">
+        Block 1
+      </div>
+    </div>
+    <div class="dropzone">
+      <div id="draggable" draggable="true" ondragstart="event.dataTransfer.setData('text/plain',null)">
+        Block 2
+      </div>
+    </div>
+    <div class="dropzone">
+      <div id="draggable" draggable="true" ondragstart="event.dataTransfer.setData('text/plain',null)">
+        Block 3
+      </div>
+    </div>
+    <div class="dropzone">
+      <div id="draggable" draggable="true" ondragstart="event.dataTransfer.setData('text/plain',null)">
+        Block 4
+      </div>
+    </div>
+    <div class="dropzone">
+      <div id="draggable" draggable="true" ondragstart="event.dataTransfer.setData('text/plain',null)">
+        Block 5
+      </div>
+    </div>
+  </div>
+  <div class="canvas" id="canvas"></div>
+  <script src="./bundle.js"></script>
+</body>
+
+</html>

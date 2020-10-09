@@ -1,0 +1,26 @@
+{
+  "name": "js-dnd",
+  "version": "1.0.0",
+  "description": "Drag and Drop in vanila js",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "webpack --mode=development --watch",
+    "build": "webpack --mode=production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shamin/js-dnd.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/shamin/js-dnd/issues"
+  },
+  "homepage": "https://github.com/shamin/js-dnd#readme",
+  "devDependencies": {
+    "jest": "^26.5.2",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^3.3.12"
+  }
+}
