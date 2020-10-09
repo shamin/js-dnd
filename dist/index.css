@@ -3,7 +3,7 @@ html {
   height: 100%;
 }
 
-#draggable {
+.template {
   width: 200px;
   height: 20px;
   text-align: center;
@@ -35,4 +35,13 @@ html {
 
 .dragging {
   opacity: 0.5;
+}
+
+.block {
+  position: absolute;
+  opacity: 1;
+  width: 200px;
+  height: 20px;
+  text-align: center;
+  background: red;
 }
