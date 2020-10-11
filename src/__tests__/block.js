@@ -51,10 +51,29 @@ test("Rearrage children rearranges children of the block and updates the blocks"
     { parent: 0, childwidth: 0, id: 1, x: 386, y: 107, width: 200, height: 20 },
   ];
   const data = rearrageChildren(blocks, blocks[0], 400, mockPadding.x);
-  expect(data).toStrictEqual([
-    { parent: -1, childwidth: 0, id: 0, x: 386, y: 67, width: 200, height: 20 },
-    { parent: 0, childwidth: 0, id: 1, x: 286, y: 107, width: 200, height: 20 },
-  ]);
+  expect(data).toStrictEqual({
+    totalRemove: 220,
+    blocks: [
+      {
+        parent: -1,
+        childwidth: 0,
+        id: 0,
+        x: 386,
+        y: 67,
+        width: 200,
+        height: 20,
+      },
+      {
+        parent: 0,
+        childwidth: 0,
+        id: 1,
+        x: 286,
+        y: 107,
+        width: 200,
+        height: 20,
+      },
+    ],
+  });
 });
 
 test("recalculateWidth ", () => {
@@ -217,6 +236,6 @@ test("rearrange function", () => {
     },
   ];
 
-  const canvas = document.createElement('div')
+  const canvas = document.createElement("div");
   expect(rearrange(before, canvas, mockPadding)).toStrictEqual(after);
 });

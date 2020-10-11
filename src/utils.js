@@ -1,4 +1,10 @@
-import { calculateChildrenWidth, rearrageChildren, rearrange } from "./block";
+import {
+  calculateChildrenWidth,
+  rearrageChildren,
+  rearrange,
+  checkOffset,
+  recalculateWidth,
+} from "./block";
 import { getBlockNodeWithId, getComputedStyle } from "./dom";
 
 export const creatNewBlock = (
@@ -38,23 +44,42 @@ export const snapNewBlock = (
   template,
   canvas,
   parentBlock,
-  paddingY = 20,
+  padding,
   blocks
 ) => {
   const newNode = createNewDomBlock(template);
 
   canvas.appendChild(newNode);
 
-  blocks = manageSnap(blocks, parentBlock);
+  // Tested ok except some dom stuffs
+  const output = manageSnap(blocks, parentBlock);
+  blocks = output.blocks;
+  const { totalWidth, totalRemove } = output;
 
   newNode.style.left =
-    parentBlock.x - getComputedStyle(newNode).width / 2 + "px";
+    parentBlock.x -
+    totalWidth / 2 +
+    totalRemove +
+    getComputedStyle(newNode).width / 2 -
+    canvas.getBoundingClientRect().left +
+    "px";
   newNode.style.top =
-    parentBlock.y + getComputedStyle(newNode).height / 2 + paddingY + "px";
+    parentBlock.y +
+    parentBlock.height / 2 +
+    padding.y +
+    canvas.getBoundingClientRect().top +
+    "px";
 
-  rearrange(blocks, canvas, { x: 20, y: 20 });
+  newNode.setAttribute("data-blockid", blocks.length);
+  blocks.push(computeNewBlock(newNode, parentBlock.id, canvas));
 
-  return newNode;
+  // Tested ok for all values
+  blocks = recalculateWidth(blocks, parentBlock, padding.x, totalWidth);
+
+  rearrange(blocks, canvas, padding);
+  checkOffset(blocks, canvas);
+
+  return blocks;
 };
 
 export const computeNewBlock = (element, parent, canvas, childwidth = 0) => {
@@ -79,10 +104,17 @@ export const computeNewBlock = (element, parent, canvas, childwidth = 0) => {
 
 const manageSnap = (blocks, block) => {
   const paddingX = 0;
+  //Tested okay
   let totalWidth = calculateChildrenWidth(blocks, block, paddingX);
   const blockNode = getBlockNodeWithId(block.id);
+  //Need to test in UI
   totalWidth += getComputedStyle(blockNode).width;
-  return rearrageChildren(blocks, block, totalWidth, paddingX);
+
+  //Tested okay except dom render
+  return {
+    ...rearrageChildren(blocks, block, totalWidth, paddingX),
+    totalWidth,
+  };
 };
 
 export const createNewDomBlock = (template) => {

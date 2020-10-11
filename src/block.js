@@ -12,7 +12,7 @@ export const getTotalWidth = (blocks, blockId, paddingX) => {
         if (childWidth > child.width) {
           return children.length - 1 === index
             ? childWidth
-            : childwidth + paddingX;
+            : childWidth + paddingX;
         }
         return children.length - 1 === index
           ? child.width
@@ -22,6 +22,7 @@ export const getTotalWidth = (blocks, blockId, paddingX) => {
   );
 };
 
+// Tested ok - except dom rendering
 export const rearrange = (blocks, canvas, padding) => {
   blocks.forEach(({ parent }) => {
     if (parent === -1) {
@@ -37,12 +38,14 @@ export const rearrange = (blocks, canvas, padding) => {
       .forEach((child) => {
         const childBlockNode = getBlockNodeWithId(child.id);
         const parentBlock = blocks.find((b) => b.id === parent);
+        // TODO: Need to check whether it is needed
         // childBlockNode.style.top =
         //   parentBlock.y + padding.y + canvas.getBoundingClientRect().top + "px";
-
+        // TODO: Need to check whether it is needed
         // parentBlock.y += padding.y;
 
         if (child.childwidth > child.width) {
+          // TODO: Test this
           childBlockNode.style.left =
             parentBlock.x -
             totalWidth / 2 +
@@ -56,6 +59,7 @@ export const rearrange = (blocks, canvas, padding) => {
             parentBlock.x - totalWidth / 2 + usedWidth + child.childwidth / 2;
           usedWidth += child.childwidth + padding.x;
         } else {
+          // TODO: Test this
           childBlockNode.style.left =
             parentBlock.x -
             totalWidth / 2 +
@@ -75,6 +79,7 @@ export const rearrange = (blocks, canvas, padding) => {
   return blocks;
 };
 
+// Tested ok for all values
 export const recalculateWidth = (blocks, block, paddingX, totalwidth) => {
   const newBlocks = [...blocks];
   if (newBlocks.find((b) => b.id === block.id).parent !== -1) {
@@ -107,6 +112,7 @@ export const recalculateWidth = (blocks, block, paddingX, totalwidth) => {
   return newBlocks;
 };
 
+// Tested ok for all values
 export const calculateChildrenWidth = (blocks, block, paddingX) => {
   let totalWidth = 0;
   blocks
@@ -121,8 +127,7 @@ export const calculateChildrenWidth = (blocks, block, paddingX) => {
   return totalWidth;
 };
 
-// Hopefully won't be used
-const checkOffset = (blocks, canvas) => {
+export const checkOffset = (blocks, canvas) => {
   const offsets = blocks.map((block) => {
     return block.x - block.width / 2;
   });
@@ -168,12 +173,14 @@ const checkAttach = (blocks, id, blockNode, paddingX) => {
   return false;
 };
 
+// Tested ok - except dom rendering
 export const rearrageChildren = (blocks, block, totalWidth, paddingX) => {
   let totalRemove = 0;
   const children = blocks.filter((b) => b.parent === block.id);
   const newChildren = children.map((child, index) => {
     const childBlockNode = getBlockNodeWithId(child.id);
     if (child.childwidth > child.width) {
+      //Not tested
       childBlockNode.style.left =
         block.x -
         totalWidth / 2 +
@@ -182,8 +189,8 @@ export const rearrageChildren = (blocks, block, totalWidth, paddingX) => {
         child.width / 2 +
         "px";
 
-      const newX =
-        children[0].x - totalWidth / 2 + totalRemove + child.childWidth / 2;
+      const newX = 0;
+      children[0].x - totalWidth / 2 + totalRemove + child.childWidth / 2;
 
       totalRemove += child.childwidth + paddingX;
       return {
@@ -192,14 +199,21 @@ export const rearrageChildren = (blocks, block, totalWidth, paddingX) => {
       };
     }
 
+    //Not tested
     childBlockNode.style.left = block.x - totalWidth / 2 + totalRemove + "px";
     const newX = children[0].x - totalWidth / 2 + totalRemove + child.width / 2;
-    totalRemove += child.childwidth + paddingX;
+
+    totalRemove += child.width + paddingX;
     return {
       ...child,
       x: newX,
     };
   });
 
-  return [...blocks.filter((b) => b.parent !== block.id), ...newChildren];
+  return {
+    blocks: blocks.map((b) =>
+      b.parent !== block.id ? b : newChildren.find((c) => c.id == b.id)
+    ),
+    totalRemove,
+  };
 };

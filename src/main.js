@@ -13,7 +13,7 @@ const getRelativeMousePosition = (event, element) => {
 };
 
 const initFlow = (canvasId) => {
-  const blocks = [];
+  let blocks = [];
 
   const spacingX = 100;
   const spacingY = 100;
@@ -128,10 +128,13 @@ const initFlow = (canvasId) => {
             canvas
           );
 
-          const newNode = snapNewBlock(draggedElement, canvas, parentBlock, 20,  blocks);
-          newNode.setAttribute("data-blockid", blocks.length);
-
-          blocks.push(computeNewBlock(newNode, parentBlockId, canvas));
+          blocks = snapNewBlock(
+            draggedElement,
+            canvas,
+            parentBlock,
+            { x: 20, y: 20 },
+            blocks
+          );
         }
       }
     },
