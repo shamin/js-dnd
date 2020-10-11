@@ -128,8 +128,8 @@ const initFlow = (canvasId) => {
             canvas
           );
 
-          const newNode = snapNewBlock(draggedElement, canvas, parentBlock);
-          newNode.setAttribute("data-blockid", blocks.length + 1);
+          const newNode = snapNewBlock(draggedElement, canvas, parentBlock, 20,  blocks);
+          newNode.setAttribute("data-blockid", blocks.length);
 
           blocks.push(computeNewBlock(newNode, parentBlockId, canvas));
         }

@@ -1,3 +1,5 @@
+import { getBlockNodeWithId } from "./dom";
+
 export const getTotalWidth = (blocks, blockId, paddingX) => {
   const children = blocks.filter((b) => b.parent === blockId);
   return (
@@ -36,9 +38,7 @@ const rearrange = (blocks, canvas) => {
     blocks
       .filter((b) => b.parent === parent)
       .forEach((child) => {
-        const childBlockNode = document.querySelector(
-          'div[data-blockid="' + child.id + '"]'
-        );
+        const childBlockNode = getBlockNodeWithId(child.id);
         const parentBlock = blocks.find((b) => b.id === parent);
         childBlockNode.style.top =
           parentBlock.y + paddingY + canvas.getBoundingClientRect().top + "px";
@@ -106,15 +106,15 @@ const recalculateWidth = (blocks, blocko, paddingX, totalwidth) => {
   }
 };
 
-export const calculateTotalWidth = (blocks, block) => {
+export const calculateChildrenWidth = (blocks, block, paddingX) => {
   let totalWidth = 0;
   blocks
-    .filter((b) => b.parent == block)
+    .filter((b) => b.parent == block.id)
     .forEach((child) => {
       if (child.childWidth > child.width) {
-        totalwidth += child.childWidth + paddingx;
+        totalWidth += child.childWidth + paddingX;
       } else {
-        totalwidth += child.width + paddingx;
+        totalWidth += child.width + paddingX;
       }
     });
   return totalWidth;
@@ -130,9 +130,7 @@ const checkOffset = (blocks, canvas) => {
 
   if (minOffsetleft < canvas.getBoundingClientRect().left) {
     blocks.forEach((block) => {
-      const blockNode = document.querySelector(
-        'div[data-blockid="' + block.id + '"]'
-      );
+      const blockNode = getBlockNodeWithId(block.id);
       blockNode.style.left =
         block.x -
         block.width / 2 -
@@ -147,6 +145,7 @@ const checkOffset = (blocks, canvas) => {
   }
 };
 
+// Hopefully won't be used
 const checkAttach = (blocks, id, blockNode, paddingX) => {
   const xPos =
     blockNode.getBoundingClientRect().left +
@@ -166,4 +165,40 @@ const checkAttach = (blocks, id, blockNode, paddingX) => {
     return true;
   }
   return false;
+};
+
+export const rearrageChildren = (blocks, block, totalWidth, paddingX) => {
+  let totalRemove = 0;
+  const children = blocks.filter((b) => b.parent === block.id);
+  const newChildren = children.map((child, index) => {
+    const childBlockNode = getBlockNodeWithId(child.id);
+    if (child.childwidth > child.width) {
+      childBlockNode.style.left =
+        block.x -
+        totalWidth / 2 +
+        totalRemove +
+        child.childwidth / 2 -
+        child.width / 2 +
+        "px";
+
+      const newX =
+        children[0].x - totalWidth / 2 + totalRemove + child.childWidth / 2;
+
+      totalRemove += child.childwidth + paddingX;
+      return {
+        ...child,
+        x: newX,
+      };
+    }
+
+    childBlockNode.style.left = block.x - totalWidth / 2 + totalRemove + "px";
+    const newX = children[0].x - totalWidth / 2 + totalRemove + child.width / 2;
+    totalRemove += child.childwidth + paddingX;
+    return {
+      ...child,
+      x: newX,
+    };
+  });
+
+  return [...blocks.filter((b) => b.parent !== block.id), ...newChildren];
 };
