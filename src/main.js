@@ -18,6 +18,8 @@ const initFlow = (canvasId) => {
   const spacingX = 100;
   const spacingY = 100;
 
+  const padding = {x: 20, y: 20}
+
   let draggedElement;
 
   const canvas = document.getElementById(canvasId);
@@ -132,7 +134,7 @@ const initFlow = (canvasId) => {
             draggedElement,
             canvas,
             parentBlock,
-            { x: 20, y: 20 },
+            padding,
             blocks
           );
         }

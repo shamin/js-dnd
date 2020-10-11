@@ -9,3 +9,13 @@ export const getComputedStyle = (element) => {
 export const getBlockNodeWithId = (id) => {
   return document.querySelector('div[data-blockid="' + id + '"]');
 };
+
+export const getArrowNodeWithId = (id) => {
+  return document.querySelector('div[data-arrowid="' + id + '"]');
+};
+
+export const removeAllChildren = (element) => {
+  while (element.firstChild) {
+    element.removeChild(element.lastChild);
+  }
+};
