@@ -22,42 +22,39 @@ export const getTotalWidth = (blocks, blockId, paddingX) => {
   );
 };
 
-const rearrange = (blocks, canvas) => {
-  const paddingY = 20;
-  const paddingX = 20;
-
+export const rearrange = (blocks, canvas, padding) => {
   blocks.forEach(({ parent }) => {
     if (parent === -1) {
       return;
     }
-    const totalWidth = getTotalWidth(blocks, parent, paddingX);
+    const totalWidth = getTotalWidth(blocks, parent, padding.x);
 
-    blocks.find((b) => b.id === parentId).childWidth = totalWidth;
+    blocks.find((b) => b.id === parent).childwidth = totalWidth;
 
-    const usedWidth = 0;
+    let usedWidth = 0;
     blocks
       .filter((b) => b.parent === parent)
       .forEach((child) => {
         const childBlockNode = getBlockNodeWithId(child.id);
         const parentBlock = blocks.find((b) => b.id === parent);
-        childBlockNode.style.top =
-          parentBlock.y + paddingY + canvas.getBoundingClientRect().top + "px";
+        // childBlockNode.style.top =
+        //   parentBlock.y + padding.y + canvas.getBoundingClientRect().top + "px";
 
-        parentBlock.y += paddingY;
+        // parentBlock.y += padding.y;
 
         if (child.childwidth > child.width) {
           childBlockNode.style.left =
             parentBlock.x -
             totalWidth / 2 +
             usedWidth +
-            child.childWidth / 2 -
+            child.childwidth / 2 -
             child.width / 2 +
             canvas.getBoundingClientRect().left +
             "px";
 
           child.x =
-            parentBlock.x - totalwidth / 2 + usedWidth + child.childwidth / 2;
-          usedWidth += child.childwidth + paddingX;
+            parentBlock.x - totalWidth / 2 + usedWidth + child.childwidth / 2;
+          usedWidth += child.childwidth + padding.x;
         } else {
           childBlockNode.style.left =
             parentBlock.x -
@@ -67,43 +64,47 @@ const rearrange = (blocks, canvas) => {
             "px";
 
           child.x =
-            parentBlock.x - totalwidth / 2 + usedWidth + child.width / 2;
-          usedWidth += child.width + paddingX;
+            parentBlock.x - totalWidth / 2 + usedWidth + child.width / 2;
+          usedWidth += child.width + padding.x;
         }
       });
 
     //TODO: Add arrowblock code here
   });
+
+  return blocks;
 };
 
-const recalculateWidth = (blocks, blocko, paddingX, totalwidth) => {
-  if (blocks.find((b) => b.id === blocko).parent !== -1) {
-    let ourBlock = blocko;
+export const recalculateWidth = (blocks, block, paddingX, totalwidth) => {
+  const newBlocks = [...blocks];
+  if (newBlocks.find((b) => b.id === block.id).parent !== -1) {
+    let ourBlock = block.id;
     while (true) {
-      if (blocks.find((b) => b.id === ourBlock).parent == -1) {
+      if (newBlocks.find((b) => b.id === ourBlock).parent == -1) {
         break;
       } else {
         let zwidth = 0;
-        const children = blocks.filter((b) => b.parent == ourBlock);
+        const children = newBlocks.filter((b) => b.parent == ourBlock);
         children.forEach((child, index) => {
           if (child.childWidth > child.width) {
             zwidth +=
               index === children.length - 1
-                ? children.childwidth
-                : children.childwidth + paddingX;
+                ? child.childwidth
+                : child.childwidth + paddingX;
           } else {
             zwidth +=
               index === children.length - 1
-                ? children.width
-                : children.width + paddingX;
+                ? child.width
+                : child.width + paddingX;
           }
         });
-        blocks.find((b) => b.id === ourBlock).childWidth = zwidth;
-        ourBlock = blocks.find((b) => b.id == ourBlock).parent;
+        newBlocks.find((b) => b.id === ourBlock).childwidth = zwidth;
+        ourBlock = newBlocks.find((b) => b.id == ourBlock).parent;
       }
     }
-    blocks.find((b) => b.id == ourBlock).childwidth = totalwidth;
+    newBlocks.find((b) => b.id == ourBlock).childwidth = totalwidth;
   }
+  return newBlocks;
 };
 
 export const calculateChildrenWidth = (blocks, block, paddingX) => {

@@ -1,8 +1,10 @@
+import * as dom from "../dom";
 import {
   creatNewBlock,
   moveBlock,
   snapNewBlock,
   computeNewBlock,
+  createNewDomBlock,
 } from "../utils";
 
 test("creatNewBlock should attach and return a new block node", () => {
@@ -57,6 +59,8 @@ test("snapNewBlock should attach a new block relative to parent and returns it",
     { parent: 0, childwidth: 0, id: 1, x: 386, y: 107, width: 200, height: 20 },
   ];
 
+  document.querySelector = jest.fn(() => ({ style: { left: 0 } }));
+
   const newNode = snapNewBlock(element, target, parentBlock, 30, blocks);
 
   expect(target.children.length).toBe(1);
@@ -93,4 +97,20 @@ test("computeNewBlock should compute block data from the block node element", ()
     x: 400,
     y: 165,
   });
+});
+
+test("createNewDomBlock creates a new dom element from template for block and returns it", () => {
+  const template = document.createElement("div");
+  template.classList.add("template");
+  template.classList.add("dragging");
+  const newNode = createNewDomBlock(template);
+  expect(newNode.tagName.toLowerCase()).toBe("div");
+  expect(newNode.className).toContain("block");
+  expect(newNode.className).not.toContain("template");
+  expect(newNode.className).not.toContain("dragging");
+  expect(newNode.children.length).toBe(1);
+  const dragAreaContainer = newNode.children[0];
+  expect(dragAreaContainer.className).toBe("drag-area-container");
+  expect(dragAreaContainer.children[0].className).toBe("drag-area");
+  expect(dragAreaContainer.children[0].id).toBe("drag-area");
 });
