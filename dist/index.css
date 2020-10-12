@@ -71,3 +71,7 @@ html {
   background: #0095ff;
   border-radius: 100%;
 }
+
+.arrow-block {
+  position: absolute;
+}

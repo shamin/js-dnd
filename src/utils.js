@@ -1,3 +1,4 @@
+import { drawArrow } from "./arrow";
 import {
   calculateChildrenWidth,
   rearrageChildren,
@@ -70,8 +71,14 @@ export const snapNewBlock = (
     canvas.getBoundingClientRect().top +
     "px";
 
-  newNode.setAttribute("data-blockid", blocks.length);
+  const newBlockId = blocks.length;
+  newNode.setAttribute("data-blockid", newBlockId);
   blocks.push(computeNewBlock(newNode, parentBlock.id, canvas));
+
+  const arrowBlock = blocks.find((a) => a.id == newBlockId);
+  const arrowX = arrowBlock.x - parentBlock.x + 20;
+  const arrowY = padding.y;
+  drawArrow(blocks, canvas, arrowBlock, arrowX, arrowY, parentBlock.id, padding, newBlockId);
 
   // Tested ok for all values
   blocks = recalculateWidth(blocks, parentBlock, padding.x, totalWidth);

@@ -1,4 +1,5 @@
 import { getBlockNodeWithId } from "./dom";
+import { updateArrow } from "./arrow";
 
 export const getTotalWidth = (blocks, blockId, paddingX) => {
   const children = blocks.filter((b) => b.parent === blockId);
@@ -71,9 +72,12 @@ export const rearrange = (blocks, canvas, padding) => {
             parentBlock.x - totalWidth / 2 + usedWidth + child.width / 2;
           usedWidth += child.width + padding.x;
         }
+        // TODO: Arrow not tested
+        const arrowBlock = blocks.find((a) => a.id == child.id);
+        const arrowX = arrowBlock.x - parentBlock.x + 20;
+        const arrowY = padding.y;
+        updateArrow(blocks, canvas, arrowBlock, arrowX, arrowY, child, padding);
       });
-
-    //TODO: Add arrowblock code here
   });
 
   return blocks;
