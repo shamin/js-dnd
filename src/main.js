@@ -1,3 +1,5 @@
+import { createFirstBlock } from "./block";
+import { getComputedStyle, windowScroll } from "./dom";
 import {
   creatNewBlock,
   moveBlock,
@@ -13,16 +15,22 @@ const getRelativeMousePosition = (event, element) => {
 };
 
 const initFlow = (canvasId) => {
+  const canvas = document.getElementById(canvasId);
   let blocks = [];
 
-  const spacingX = 100;
-  const spacingY = 100;
-
-  const padding = {x: 20, y: 20}
+  const padding = { x: 20, y: 20 };
 
   let draggedElement;
 
-  const canvas = document.getElementById(canvasId);
+  const canvasPos = getComputedStyle(canvas).position;
+  const relativePosition = {
+    x: ["absolute", "fixed"].includes(canvasPos)
+      ? canvas.getBoundingClientRect().left
+      : 0,
+    y: ["absolute", "fixed"].includes(canvasPos)
+      ? canvas.getBoundingClientRect().top
+      : 0,
+  };
 
   let dragElementClickPosition = {};
   let rearrange = false;
@@ -98,11 +106,13 @@ const initFlow = (canvasId) => {
           if (blocks.length === 0) {
             const newNode = creatNewBlock(
               draggedElement,
-              event.target,
+              canvas,
               targetReleativeMousePostion,
               dragElementClickPosition
             );
-            blocks.push(computeNewBlock(newNode, -1, canvas));
+            blocks.push(
+              computeNewBlock(newNode, -1, canvas, 0, windowScroll())
+            );
           }
         } else {
           moveBlock(

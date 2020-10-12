@@ -104,14 +104,19 @@ test("computeNewBlock should compute block data from the block node element", ()
     width: 200,
   };
 
+  jest
+    .spyOn(dom, "windowScroll")
+    .mockImplementationOnce(() => ({ x: 0, y: 0 }));
+
+  jest.spyOn(dom, "getComputedStyle").mockImplementationOnce(() => ({
+    width: mockDetails.width,
+    height: mockDetails.height,
+  }));
+
   const target = document.createElement("target");
   const element = document.createElement("template");
   element.getBoundingClientRect = jest.fn(() => ({ left: 300, top: 150 }));
   element.setAttribute("data-blockid", 2);
-  window.getComputedStyle = jest.fn(() => ({
-    width: mockDetails.width,
-    height: mockDetails.height,
-  }));
 
   const blockData = computeNewBlock(element, mockDetails.parent, target);
 

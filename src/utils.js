@@ -6,7 +6,7 @@ import {
   checkOffset,
   recalculateWidth,
 } from "./block";
-import { getBlockNodeWithId, getComputedStyle } from "./dom";
+import { getBlockNodeWithId, getComputedStyle, windowScroll } from "./dom";
 
 export const creatNewBlock = (
   element,
@@ -73,12 +73,23 @@ export const snapNewBlock = (
 
   const newBlockId = blocks.length;
   newNode.setAttribute("data-blockid", newBlockId);
-  blocks.push(computeNewBlock(newNode, parentBlock.id, canvas));
+  blocks.push(
+    computeNewBlock(newNode, parentBlock.id, canvas, 0, windowScroll())
+  );
 
   const arrowBlock = blocks.find((a) => a.id == newBlockId);
   const arrowX = arrowBlock.x - parentBlock.x + 20;
   const arrowY = padding.y;
-  drawArrow(blocks, canvas, arrowBlock, arrowX, arrowY, parentBlock.id, padding, newBlockId);
+  drawArrow(
+    blocks,
+    canvas,
+    arrowBlock,
+    arrowX,
+    arrowY,
+    parentBlock.id,
+    padding,
+    newBlockId
+  );
 
   // Tested ok for all values
   blocks = recalculateWidth(blocks, parentBlock, padding.x, totalWidth);
@@ -89,23 +100,27 @@ export const snapNewBlock = (
   return blocks;
 };
 
-export const computeNewBlock = (element, parent, canvas, childwidth = 0) => {
-  const elementWidth = getComputedStyle(element).width;
-  const elementHeight = getComputedStyle(element).height;
+export const computeNewBlock = (element, parent, canvas) => {
+  const elementDimen = getComputedStyle(element);
+  console.log("elementDimen", elementDimen);
   return {
     parent,
-    childwidth,
+    childwidth: 0,
     id: parseInt(element.getAttribute("data-blockid")),
     x:
       element.getBoundingClientRect().left +
-      elementWidth / 2 -
+      windowScroll().x +
+      elementDimen.width / 2 +
+      canvas.scrollLeft -
       canvas.getBoundingClientRect().left,
     y:
       element.getBoundingClientRect().top +
-      elementHeight / 2 -
+      windowScroll().y +
+      elementDimen.height / 2 +
+      canvas.scrollTop -
       canvas.getBoundingClientRect().top,
-    width: elementWidth,
-    height: elementHeight,
+    width: elementDimen.width,
+    height: elementDimen.height,
   };
 };
 

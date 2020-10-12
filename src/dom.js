@@ -19,3 +19,8 @@ export const removeAllChildren = (element) => {
     element.removeChild(element.lastChild);
   }
 };
+
+export const windowScroll = () => ({
+  x: window.scrollX,
+  y: window.scrollY,
+});
