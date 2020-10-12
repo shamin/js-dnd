@@ -74,4 +74,5 @@ html {
 
 .arrow-block {
   position: absolute;
+  pointer-events: none;
 }

@@ -37,7 +37,7 @@ export const drawArrow = (blocks, canvas, arrow, x, y, id, padding, newBlockId) 
       5 -
       // (absx + window.scrollX) +
       canvas.scrollLeft +
-      canvas.getBoundiZngClientRect().left +
+      canvas.getBoundingClientRect().left +
       "px";
   } else {
     arrowSvg = generateArrowSvg(

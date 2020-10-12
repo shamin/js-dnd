@@ -6,7 +6,12 @@ import {
   checkOffset,
   recalculateWidth,
 } from "./block";
-import { getBlockNodeWithId, getComputedStyle, windowScroll } from "./dom";
+import {
+  getBlockId,
+  getBlockNodeWithId,
+  getComputedStyle,
+  windowScroll,
+} from "./dom";
 
 export const creatNewBlock = (
   element,
@@ -57,25 +62,23 @@ export const snapNewBlock = (
   blocks = output.blocks;
   const { totalWidth, totalRemove } = output;
 
+  console.log(parentBlock.x, totalWidth / 2 , totalRemove, getComputedStyle(newNode).width / 2, canvas.getBoundingClientRect().left)
+
   newNode.style.left =
     parentBlock.x -
     totalWidth / 2 +
     totalRemove +
     getComputedStyle(newNode).width / 2 -
-    canvas.getBoundingClientRect().left +
     "px";
   newNode.style.top =
     parentBlock.y +
     parentBlock.height / 2 +
     padding.y +
-    canvas.getBoundingClientRect().top +
     "px";
 
   const newBlockId = blocks.length;
   newNode.setAttribute("data-blockid", newBlockId);
-  blocks.push(
-    computeNewBlock(newNode, parentBlock.id, canvas, 0, windowScroll())
-  );
+  blocks.push(computeNewBlock(newNode, parentBlock.id, canvas));
 
   const arrowBlock = blocks.find((a) => a.id == newBlockId);
   const arrowX = arrowBlock.x - parentBlock.x + 20;
@@ -102,11 +105,10 @@ export const snapNewBlock = (
 
 export const computeNewBlock = (element, parent, canvas) => {
   const elementDimen = getComputedStyle(element);
-  console.log("elementDimen", elementDimen);
   return {
     parent,
     childwidth: 0,
-    id: parseInt(element.getAttribute("data-blockid")),
+    id: getBlockId(element),
     x:
       element.getBoundingClientRect().left +
       windowScroll().x +

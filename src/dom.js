@@ -14,6 +14,10 @@ export const getArrowNodeWithId = (id) => {
   return document.querySelector('div[data-arrowid="' + id + '"]');
 };
 
+export const getBlockId = (element) => {
+  return parseInt(element.getAttribute("data-blockid"));
+};
+
 export const removeAllChildren = (element) => {
   while (element.firstChild) {
     element.removeChild(element.lastChild);

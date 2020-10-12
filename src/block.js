@@ -23,7 +23,6 @@ export const getTotalWidth = (blocks, blockId, paddingX) => {
   );
 };
 
-// Tested ok - except dom rendering
 export const rearrange = (blocks, canvas, padding) => {
   blocks.forEach(({ parent }) => {
     if (parent === -1) {
@@ -39,40 +38,29 @@ export const rearrange = (blocks, canvas, padding) => {
       .forEach((child) => {
         const childBlockNode = getBlockNodeWithId(child.id);
         const parentBlock = blocks.find((b) => b.id === parent);
-        // TODO: Need to check whether it is needed
-        // childBlockNode.style.top =
-        //   parentBlock.y + padding.y + canvas.getBoundingClientRect().top + "px";
-        // TODO: Need to check whether it is needed
-        // parentBlock.y += padding.y;
-
         if (child.childwidth > child.width) {
-          // TODO: Test this
           childBlockNode.style.left =
             parentBlock.x -
             totalWidth / 2 +
             usedWidth +
             child.childwidth / 2 -
             child.width / 2 +
-            canvas.getBoundingClientRect().left +
             "px";
 
           child.x =
             parentBlock.x - totalWidth / 2 + usedWidth + child.childwidth / 2;
           usedWidth += child.childwidth + padding.x;
         } else {
-          // TODO: Test this
           childBlockNode.style.left =
             parentBlock.x -
             totalWidth / 2 +
             usedWidth +
-            canvas.getBoundingClientRect().left +
             "px";
 
           child.x =
             parentBlock.x - totalWidth / 2 + usedWidth + child.width / 2;
           usedWidth += child.width + padding.x;
         }
-        // TODO: Arrow not tested
         const arrowBlock = blocks.find((a) => a.id == child.id);
         const arrowX = arrowBlock.x - parentBlock.x + 20;
         const arrowY = padding.y;
@@ -83,7 +71,6 @@ export const rearrange = (blocks, canvas, padding) => {
   return blocks;
 };
 
-// Tested ok for all values
 export const recalculateWidth = (blocks, block, paddingX, totalwidth) => {
   const newBlocks = [...blocks];
   if (newBlocks.find((b) => b.id === block.id).parent !== -1) {
@@ -116,7 +103,6 @@ export const recalculateWidth = (blocks, block, paddingX, totalwidth) => {
   return newBlocks;
 };
 
-// Tested ok for all values
 export const calculateChildrenWidth = (blocks, block, paddingX) => {
   let totalWidth = 0;
   blocks
@@ -155,36 +141,12 @@ export const checkOffset = (blocks, canvas) => {
   }
 };
 
-// Hopefully won't be used
-const checkAttach = (blocks, id, blockNode, paddingX) => {
-  const xPos =
-    blockNode.getBoundingClientRect().left +
-    parseInt(window.getComputedStyle(blockNode).width) / 2 +
-    canvas.scrollLeft -
-    canvas.getBoundingClientRect().left;
-  const yPos =
-    blockNode.getBoundingClientRect().top +
-    canvas.scrollTop -
-    canvas.getBoundingClientRect().top;
-  const block = blocks.find((b) => b.id === id);
-  if (
-    xPos >= block.x - block.width / 2 - paddingX &&
-    xPos <= block.x + block.width / 2 + paddingX &&
-    yPos <= block.y + block.checkAttach
-  ) {
-    return true;
-  }
-  return false;
-};
-
-// Tested ok - except dom rendering
 export const rearrageChildren = (blocks, block, totalWidth, paddingX) => {
   let totalRemove = 0;
   const children = blocks.filter((b) => b.parent === block.id);
   const newChildren = children.map((child, index) => {
     const childBlockNode = getBlockNodeWithId(child.id);
     if (child.childwidth > child.width) {
-      //Not tested
       childBlockNode.style.left =
         block.x -
         totalWidth / 2 +
@@ -203,7 +165,6 @@ export const rearrageChildren = (blocks, block, totalWidth, paddingX) => {
       };
     }
 
-    //Not tested
     childBlockNode.style.left = block.x - totalWidth / 2 + totalRemove + "px";
     const newX = children[0].x - totalWidth / 2 + totalRemove + child.width / 2;
 
