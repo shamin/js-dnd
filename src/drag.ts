@@ -1,4 +1,3 @@
-import { template } from '@babel/core';
 import { snapNewChild } from './blocks';
 import { createNewDomBlockNode, initDragListeners } from './dom';
 import { Block, MousePos, Padding } from './types';
@@ -11,12 +10,12 @@ function getRelativeMousePosition(event: DragEvent, element: HTMLElement): Mouse
   };
 }
 
-export function initDrag(canvas: HTMLElement, padding: Padding) {
+export function initDrag(canvas: HTMLElement, padding: Padding): void {
   let draggedElement: HTMLElement;
   let dragElementClickPosition: MousePos;
   let blocks: Block[] = [];
 
-  function onDragStart(event: DragEvent) {
+  function onDragStart(event: DragEvent): void {
     const target = event.target as HTMLElement;
     draggedElement = target;
     dragElementClickPosition = getRelativeMousePosition(event, draggedElement);
@@ -24,21 +23,21 @@ export function initDrag(canvas: HTMLElement, padding: Padding) {
     target.classList.add('dragging');
   }
 
-  function onDragEnter(element: HTMLElement) {
+  function onDragEnter(element: HTMLElement): void {
     if (element.id === 'drag-area') {
       const parentBlock = element.parentElement.parentElement;
       parentBlock.classList.add('show-indicator');
     }
   }
 
-  function onDragLeave(element: HTMLElement) {
+  function onDragLeave(element: HTMLElement): void {
     if (element.id === 'drag-area') {
       const parentBlock = element.parentElement.parentElement;
       parentBlock.classList.remove('show-indicator');
     }
   }
 
-  function onDrop(event: DragEvent) {
+  function onDrop(event: DragEvent): void {
     const target = event.target as HTMLElement;
     const parentBlockElement = target.parentElement.parentElement;
     parentBlockElement.classList.remove('show-indicator');
@@ -58,7 +57,7 @@ export function initDrag(canvas: HTMLElement, padding: Padding) {
       target.appendChild(newNode);
       blocks.push(computeNewBlock(newNode, -1));
     } else {
-      if (target.id === "drag-area") {
+      if (target.id === 'drag-area') {
         blocks = snapNewChild(blocks, draggedElement, parentBlock, padding);
       }
     }

@@ -1,4 +1,4 @@
-import { drawArrow, updateArrow } from './arrow';
+import { drawArrow, moveArrowOffset, updateArrow } from './arrow';
 import { createNewDomBlockNode, getBlockDomNode, getCanvasElement, getStyles } from './dom';
 import { Arrow, Block, Padding } from './types';
 import { computeNewBlock, getBlockChildren, isFirstBlock } from './utils';
@@ -33,14 +33,13 @@ export function recalculateChildWidth(
 /*
   Returns the new width of children
 */
-export function calculateChildrenWidth(blocks: Block[], parentId: number, padding: Padding) {
+export function calculateChildrenWidth(blocks: Block[], parentId: number, padding: Padding): number {
   let newChildrenWidth = 0;
 
   getBlockChildren(blocks, parentId).forEach((child) => {
     const childWidth = child.childWidth > child.width ? child.childWidth : child.width;
     newChildrenWidth += childWidth + padding.x;
   });
-  // TODO: Need to add the new child width
   return newChildrenWidth;
 }
 
@@ -53,7 +52,6 @@ export function rearrageChildren(blocks: Block[], parent: Block, newChildrenWidt
   const children = getBlockChildren(blocks, parent.id);
   const firstChild = children[0];
   const newChildren = children.map((child) => {
-    //TODO: Add dom updates if needed
     let newX;
     if (child.childWidth > child.width) {
       newX = firstChild.x - newChildrenWidth / 2 + usedWidth + child.childWidth / 2;
@@ -74,7 +72,7 @@ export function rearrageChildren(blocks: Block[], parent: Block, newChildrenWidt
 /*
   Setting childWidth as 0 for all end blocks
 */
-export function cleanupEndBlocks(blocks: Block[]) {
+export function cleanupEndBlocks(blocks: Block[]): Block[] {
   return blocks.map((block) =>
     blocks.filter((b) => b.parent === block.id).length === 0 ? { ...block, childWidth: 0 } : block,
   );
@@ -83,8 +81,7 @@ export function cleanupEndBlocks(blocks: Block[]) {
 /*
   Repaint whole graph
 */
-export function repaint(blocks: Block[], padding: Padding) {
-  const canvas = getCanvasElement();
+export function repaint(blocks: Block[], padding: Padding): Block[] {
   const newBlocks = [...blocks];
 
   newBlocks.forEach(({ parent }) => {
@@ -103,7 +100,7 @@ export function repaint(blocks: Block[], padding: Padding) {
     getBlockChildren(newBlocks, parent).forEach((child) => {
       const blockDomNode = getBlockDomNode(child.id);
       const blockStyles = getStyles(blockDomNode);
-      blockDomNode.style.top = parentBlock.y + padding.y + 'px';
+      blockDomNode.style.top = parentBlock.y + padding.y + parentBlock.height / 2 + 'px';
       if (child.childWidth > child.width) {
         blockDomNode.style.left =
           parentBlock.x -
@@ -115,7 +112,6 @@ export function repaint(blocks: Block[], padding: Padding) {
           // canvas.getBoundingClientRect().left +
           'px';
         child.x = parentBlock.x - newChildrenWidth / 2 + usedWidth + child.childWidth / 2;
-
         usedWidth += child.childWidth + padding.x;
       } else {
         blockDomNode.style.left =
@@ -126,7 +122,6 @@ export function repaint(blocks: Block[], padding: Padding) {
           // canvas.getBoundingClientRect().left +
           'px';
         child.x = parentBlock.x - newChildrenWidth / 2 + usedWidth + child.width / 2;
-
         usedWidth += child.width + padding.x;
       }
 
@@ -136,7 +131,7 @@ export function repaint(blocks: Block[], padding: Padding) {
       };
       updateArrow(parentBlock, arrow, child, padding);
 
-      child.y = parentBlock.y + padding.y + blockStyles.height;
+      child.y = parentBlock.y + padding.y + parentBlock.height / 2 + blockStyles.height / 2;
     });
   });
 
@@ -146,13 +141,14 @@ export function repaint(blocks: Block[], padding: Padding) {
 /*
   Snaps a new block child with template to parent and return the new blocks
 */
-export function snapNewChild(blocks: Block[], template: HTMLElement, parent: Block, padding: Padding) {
+export function snapNewChild(blocks: Block[], template: HTMLElement, parent: Block, padding: Padding): Block[] {
   const canvas = getCanvasElement();
 
   const newBlockNode = createNewDomBlockNode(template);
   canvas.appendChild(newBlockNode);
 
   const newChildrenWidth = calculateChildrenWidth(blocks, parent.id, padding) + getStyles(newBlockNode).width;
+
   let newBlocks = rearrageChildren(blocks, parent, newChildrenWidth, padding);
   //4. Set the new block left & top if needed
 
@@ -180,13 +176,13 @@ export function snapNewChild(blocks: Block[], template: HTMLElement, parent: Blo
 /*
   Move the flow to right as new blocks appear left
 */
-function moveOffset(blocks: Block[]) {
+function moveOffset(blocks: Block[]): Block[] {
   const newBlocks = [...blocks];
   const offsets = newBlocks.map((block) => {
     return block.x - block.width / 2;
   });
 
-  const minOffsetleft = Math.min.apply(Math, offsets);
+  const minOffsetleft = Math.min(...offsets);
 
   const canvas = getCanvasElement();
 
@@ -194,8 +190,19 @@ function moveOffset(blocks: Block[]) {
     newBlocks.forEach((block) => {
       const blockNode = getBlockDomNode(block.id);
       blockNode.style.left = block.x - block.width / 2 - minOffsetleft + getStyles(canvas).rect.left + 20 + 'px';
-      block.x =
-        getStyles(blockNode).rect.left + canvas.scrollLeft + getStyles(blockNode).width - getStyles(canvas).rect.left;
+
+      if (!isFirstBlock(newBlocks, block.id)) {
+        const parentBlock = newBlocks.find((b) => b.id === block.parent);
+        const arrow: Arrow = {
+          x: block.x - parentBlock.x,
+          y: 0,
+        };
+        moveArrowOffset(parentBlock, arrow, block, minOffsetleft);
+      }
+    });
+    newBlocks.forEach((block) => {
+      const blockNode = getBlockDomNode(block.id);
+      block.x = getStyles(blockNode).rect.left + getStyles(blockNode).width / 2 - getStyles(canvas).rect.left;
     });
   }
   return newBlocks;

@@ -16,7 +16,7 @@ const generateArrowSvg = (arrowPath: string, pointerPath: string): SVGSVGElement
   return arrowSvg;
 };
 
-export function drawArrow(newBlock: Block, parent: Block, arrow: Arrow, padding: Padding) {
+export function drawArrow(newBlock: Block, parent: Block, arrow: Arrow, padding: Padding): void {
   const canvas = getCanvasElement();
   const arrowNode = document.createElement('div');
   arrowNode.setAttribute('data-arrowid', newBlock.id.toString());
@@ -36,12 +36,12 @@ export function drawArrow(newBlock: Block, parent: Block, arrow: Arrow, padding:
     );
     arrowNode.style.left = parent.x - 20 + getStyles(canvas).rect.left + 'px';
   }
-  arrowNode.style.top = parent.y + parent.height / 2 + getStyles(canvas).rect.top - 68 + 'px';
+  arrowNode.style.top = parent.y + parent.height / 2 + getStyles(canvas).rect.top + 'px';
   arrowNode.appendChild(arrowSvg);
   canvas.appendChild(arrowNode);
 }
 
-export function updateArrow(parent: Block, arrow: Arrow, block: Block, padding: Padding) {
+export function updateArrow(parent: Block, arrow: Arrow, block: Block, padding: Padding): void {
   const canvas = getCanvasElement();
   const arrowNode = getArrowDomNode(block.id);
   if (arrowNode) {
@@ -61,5 +61,16 @@ export function updateArrow(parent: Block, arrow: Arrow, block: Block, padding: 
       `M${arrow.x - 5} ${arrow.y - 5}H${arrow.x + 5}L${arrow.x} ${arrow.y}L${arrow.x - 5} ${arrow.y - 5}Z`,
     );
     arrowNode.appendChild(newArrowNodeChild);
+  }
+}
+
+export function moveArrowOffset(parent: Block, arrow: Arrow, block: Block, minOffsetleft: number): void {
+  const canvas = getCanvasElement();
+  const arrowNode = getArrowDomNode(block.id);
+
+  if (arrow.x < 0) {
+    arrowNode.style.left = block.x - minOffsetleft + 15 + getStyles(canvas).rect.left + 'px';
+  } else {
+    arrowNode.style.left = parent.x - minOffsetleft + getStyles(canvas).rect.left + 'px';
   }
 }

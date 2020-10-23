@@ -16,7 +16,7 @@ export function getBlockIdFromElement(blockDomNode: HTMLElement): number {
   return parseInt(blockDomNode.getAttribute('data-blockid'));
 }
 
-export function removeAllChildren(element: HTMLElement) {
+export function removeAllChildren(element: HTMLElement): void {
   while (element.firstChild) {
     element.removeChild(element.lastChild);
   }
@@ -54,7 +54,7 @@ export function initDragListeners(
   onDragEnter: (e: HTMLElement) => void,
   onDragLeave: (e: HTMLElement) => void,
   onDrop: (e: DragEvent) => void,
-) {
+): void {
   document.addEventListener('dragstart', (e) => {
     const target = e.target as HTMLElement;
     target.classList.add('dragging');
