@@ -18,3 +18,8 @@ export interface ComputedStyle {
   width: number;
   height: number;
 }
+
+export interface MousePos {
+  x: number;
+  y: number;
+}

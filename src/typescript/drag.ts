@@ -1,18 +1,19 @@
 import { template } from '@babel/core';
 import { snapNewChild } from './blocks';
-import { initDragListeners } from './dom';
-import { Block, Padding } from './types';
+import { createNewDomBlockNode, initDragListeners } from './dom';
+import { Block, MousePos, Padding } from './types';
+import { computeNewBlock } from './utils';
 
-const getRelativeMousePosition = (event: DragEvent, element: HTMLElement) => {
+function getRelativeMousePosition(event: DragEvent, element: HTMLElement): MousePos {
   return {
     x: event.clientX - element.getBoundingClientRect().left,
     y: event.clientY - element.getBoundingClientRect().top,
   };
-};
+}
 
 export function initDrag(canvas: HTMLElement, padding: Padding) {
   let draggedElement: HTMLElement;
-  let dragElementClickPosition;
+  let dragElementClickPosition: MousePos;
   let blocks: Block[] = [];
 
   function onDragStart(event: DragEvent) {
@@ -47,7 +48,20 @@ export function initDrag(canvas: HTMLElement, padding: Padding) {
 
     const targetReleativeMousePostion = getRelativeMousePosition(event, canvas);
 
-    blocks = snapNewChild(blocks, draggedElement, parentBlock, padding);
+    if (blocks.length === 0) {
+      const newNode = createNewDomBlockNode(draggedElement);
+      newNode.setAttribute('data-blockid', '0');
+
+      newNode.style.left = targetReleativeMousePostion.x - dragElementClickPosition.x + 'px';
+      newNode.style.top = targetReleativeMousePostion.y - dragElementClickPosition.y + 'px';
+
+      target.appendChild(newNode);
+      blocks.push(computeNewBlock(newNode, -1));
+    } else {
+      if (target.id === "drag-area") {
+        blocks = snapNewChild(blocks, draggedElement, parentBlock, padding);
+      }
+    }
   }
 
   initDragListeners(onDragStart, onDragEnter, onDragLeave, onDrop);

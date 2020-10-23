@@ -46,12 +46,7 @@ export function calculateChildrenWidth(blocks: Block[], parentId: number, paddin
 /*
   Rearrages the current children of the parent
 */
-export function rearrageChildren(
-  blocks: Block[],
-  parent: Block,
-  newChildrenWidth: number,
-  padding: Padding,
-): { blocks: Block[]; usedWidth: number } {
+export function rearrageChildren(blocks: Block[], parent: Block, newChildrenWidth: number, padding: Padding): Block[] {
   let usedWidth = 0;
 
   const children = getBlockChildren(blocks, parent.id);
@@ -72,10 +67,7 @@ export function rearrageChildren(
     };
   });
 
-  return {
-    blocks: blocks.map((b) => (b.parent !== parent.id ? b : newChildren.find((c) => c.id == b.id))),
-    usedWidth,
-  };
+  return blocks.map((b) => (b.parent !== parent.id ? b : newChildren.find((c) => c.id == b.id)));
 }
 
 /*
@@ -92,23 +84,25 @@ export function cleanupEndBlocks(blocks: Block[]) {
 */
 export function repaint(blocks: Block[], padding: Padding) {
   const canvas = getCanvasElement();
+  const newBlocks = [...blocks];
 
-  blocks.forEach(({ parent }) => {
+  newBlocks.forEach(({ parent }) => {
     if (parent === -1) {
       return;
     }
 
-    const newChildrenWidth = calculateChildrenWidth(blocks, parent, padding) - padding.x; // Removing the padding from last child
+    const newChildrenWidth = calculateChildrenWidth(newBlocks, parent, padding) - padding.x; // Removing the padding from last child
 
-    blocks.find((b) => b.id === parent).childWidth = newChildrenWidth;
+    newBlocks.find((b) => b.id === parent).childWidth = newChildrenWidth;
 
-    const parentBlock = blocks.find((b) => b.id === parent);
+    const parentBlock = newBlocks.find((b) => b.id === parent);
 
     let usedWidth = 0;
 
-    getBlockChildren(blocks, parent).forEach((child) => {
+    getBlockChildren(newBlocks, parent).forEach((child) => {
       const blockDomNode = getBlockDomNode(child.id);
-      blockDomNode.style.top = parentBlock.y + padding.y + canvas.getBoundingClientRect().top + 'px';
+      const blockStyles = getStyles(blockDomNode);
+      blockDomNode.style.top = parentBlock.y + padding.y + 'px';
       if (child.childWidth > child.width) {
         blockDomNode.style.left =
           parentBlock.x -
@@ -117,7 +111,7 @@ export function repaint(blocks: Block[], padding: Padding) {
           child.childWidth / 2 -
           child.width / 2 -
           window.scrollX +
-          canvas.getBoundingClientRect().left +
+          // canvas.getBoundingClientRect().left +
           'px';
         child.x = parentBlock.x - newChildrenWidth / 2 + usedWidth + child.childWidth / 2;
 
@@ -128,14 +122,17 @@ export function repaint(blocks: Block[], padding: Padding) {
           newChildrenWidth / 2 +
           usedWidth -
           window.scrollX +
-          canvas.getBoundingClientRect().left +
+          // canvas.getBoundingClientRect().left +
           'px';
         child.x = parentBlock.x - newChildrenWidth / 2 + usedWidth + child.width / 2;
 
         usedWidth += child.width + padding.x;
       }
+      child.y = parentBlock.y + padding.y + blockStyles.height;
     });
   });
+
+  return newBlocks;
 }
 
 /*
@@ -148,7 +145,7 @@ export function snapNewChild(blocks: Block[], template: HTMLElement, parent: Blo
   canvas.appendChild(newBlockNode);
 
   const newChildrenWidth = calculateChildrenWidth(blocks, parent.id, padding) + getStyles(newBlockNode).width;
-  let { blocks: newBlocks, usedWidth } = rearrageChildren(blocks, parent, newChildrenWidth, padding);
+  let newBlocks = rearrageChildren(blocks, parent, newChildrenWidth, padding);
   //4. Set the new block left & top if needed
 
   newBlockNode.setAttribute('data-blockid', newBlocks.length.toString());
@@ -157,7 +154,33 @@ export function snapNewChild(blocks: Block[], template: HTMLElement, parent: Blo
 
   newBlocks = recalculateChildWidth(newBlocks, parent, newChildrenWidth, padding);
 
-  newBlocks = cleanupEndBlocks(blocks);
-  repaint(newBlocks, padding);
+  newBlocks = cleanupEndBlocks(newBlocks);
+  newBlocks = repaint(newBlocks, padding);
+
+  moveOffset(newBlocks);
+  return newBlocks;
+}
+
+/*
+  Move the flow to right as new blocks appear left
+*/
+function moveOffset(blocks: Block[]) {
+  const newBlocks = [...blocks];
+  const offsets = newBlocks.map((block) => {
+    return block.x - block.width / 2;
+  });
+
+  const minOffsetleft = Math.min.apply(Math, offsets);
+
+  const canvas = getCanvasElement();
+
+  if (minOffsetleft < getStyles(canvas).rect.left) {
+    newBlocks.forEach((block) => {
+      const blockNode = getBlockDomNode(block.id);
+      blockNode.style.left = block.x - block.width / 2 - minOffsetleft + getStyles(canvas).rect.left + 20 + 'px';
+      block.x =
+        getStyles(blockNode).rect.left + canvas.scrollLeft + getStyles(blockNode).width - getStyles(canvas).rect.left;
+    });
+  }
   return newBlocks;
 }

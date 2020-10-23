@@ -17,8 +17,8 @@ export function computeNewBlock(blockDomNode: HTMLElement, parent: number): Bloc
     parent,
     childWidth: 0,
     id: getBlockIdFromElement(blockDomNode),
-    x: elementStyles.rect.left + elementStyles.width / 2 + canvas.scrollLeft - canvasStyles.rect.left,
-    y: elementStyles.rect.top + elementStyles.height / 2 + canvas.scrollTop - canvasStyles.rect.top,
+    x: elementStyles.rect.left + elementStyles.width / 2 - canvasStyles.rect.left,
+    y: elementStyles.rect.top + elementStyles.height - canvasStyles.rect.top, 
     width: elementStyles.width,
     height: elementStyles.height,
   };
