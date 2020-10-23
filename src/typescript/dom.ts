@@ -4,12 +4,22 @@ export function getBlockDomNode(id: number): HTMLElement {
   return document.querySelector('div[data-blockid="' + id + '"]');
 }
 
+export function getArrowDomNode(id: number): HTMLElement {
+  return document.querySelector('div[data-arrowid="' + id + '"]');
+}
+
 export function getCanvasElement(): HTMLElement {
   return document.getElementById('canvas');
 }
 
 export function getBlockIdFromElement(blockDomNode: HTMLElement): number {
   return parseInt(blockDomNode.getAttribute('data-blockid'));
+}
+
+export function removeAllChildren(element: HTMLElement) {
+  while (element.firstChild) {
+    element.removeChild(element.lastChild);
+  }
 }
 
 export function getStyles(element: HTMLElement): ComputedStyle {

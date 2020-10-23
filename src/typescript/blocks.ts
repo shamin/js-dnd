@@ -1,5 +1,6 @@
+import { drawArrow, updateArrow } from './arrow';
 import { createNewDomBlockNode, getBlockDomNode, getCanvasElement, getStyles } from './dom';
-import { Block, Padding } from './types';
+import { Arrow, Block, Padding } from './types';
 import { computeNewBlock, getBlockChildren, isFirstBlock } from './utils';
 
 /*
@@ -128,6 +129,13 @@ export function repaint(blocks: Block[], padding: Padding) {
 
         usedWidth += child.width + padding.x;
       }
+
+      const arrow: Arrow = {
+        x: child.x - parentBlock.x + 20,
+        y: padding.y,
+      };
+      updateArrow(parentBlock, arrow, child, padding);
+
       child.y = parentBlock.y + padding.y + blockStyles.height;
     });
   });
@@ -148,9 +156,17 @@ export function snapNewChild(blocks: Block[], template: HTMLElement, parent: Blo
   let newBlocks = rearrageChildren(blocks, parent, newChildrenWidth, padding);
   //4. Set the new block left & top if needed
 
-  newBlockNode.setAttribute('data-blockid', newBlocks.length.toString());
+  const newBlockId = newBlocks.length;
+  newBlockNode.setAttribute('data-blockid', newBlockId.toString());
 
   newBlocks.push(computeNewBlock(newBlockNode, parent.id));
+
+  const newBlock = newBlocks.find((a) => a.id === newBlockId);
+  const arrow: Arrow = {
+    x: newBlock.x - parent.x + 20,
+    y: padding.y,
+  };
+  drawArrow(newBlock, parent, arrow, padding);
 
   newBlocks = recalculateChildWidth(newBlocks, parent, newChildrenWidth, padding);
 
