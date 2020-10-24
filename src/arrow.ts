@@ -62,6 +62,7 @@ export function updateArrow(parent: Block, arrow: Arrow, block: Block, padding: 
     );
     arrowNode.appendChild(newArrowNodeChild);
   }
+  arrowNode.style.top = parent.y + parent.height / 2 + getStyles(canvas).rect.top + 'px';
 }
 
 export function moveArrowOffset(parent: Block, arrow: Arrow, block: Block, minOffsetleft: number): void {

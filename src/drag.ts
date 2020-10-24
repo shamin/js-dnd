@@ -1,4 +1,4 @@
-import { snapNewChild } from './blocks';
+import { moveChild, snapNewChild } from './blocks';
 import { createNewDomBlockNode, initDragListeners } from './dom';
 import { Block, MousePos, Padding } from './types';
 import { computeNewBlock } from './utils';
@@ -19,6 +19,11 @@ export function initDrag(canvas: HTMLElement, padding: Padding): void {
     const target = event.target as HTMLElement;
     draggedElement = target;
     dragElementClickPosition = getRelativeMousePosition(event, draggedElement);
+
+    if (target.className.includes('block')) {
+      draggedElement.removeChild(draggedElement.querySelectorAll('.drag-area-container')[0]);
+    }
+    event.dataTransfer.setDragImage(draggedElement, dragElementClickPosition.x, dragElementClickPosition.y);
 
     target.classList.add('dragging');
   }
@@ -50,6 +55,7 @@ export function initDrag(canvas: HTMLElement, padding: Padding): void {
     if (blocks.length === 0) {
       const newNode = createNewDomBlockNode(draggedElement);
       newNode.setAttribute('data-blockid', '0');
+      newNode.setAttribute('draggable', 'false');
 
       newNode.style.left = targetReleativeMousePostion.x - dragElementClickPosition.x + 'px';
       newNode.style.top = targetReleativeMousePostion.y - dragElementClickPosition.y + 'px';
@@ -58,7 +64,11 @@ export function initDrag(canvas: HTMLElement, padding: Padding): void {
       blocks.push(computeNewBlock(newNode, -1));
     } else {
       if (target.id === 'drag-area') {
-        blocks = snapNewChild(blocks, draggedElement, parentBlock, padding);
+        if (draggedElement.className.includes('block')) {
+          blocks = moveChild(blocks, draggedElement, parentBlock, padding);
+        } else {
+          blocks = snapNewChild(blocks, draggedElement, parentBlock, padding);
+        }
       }
     }
   }

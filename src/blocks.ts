@@ -1,5 +1,12 @@
 import { drawArrow, moveArrowOffset, updateArrow } from './arrow';
-import { createNewDomBlockNode, getBlockDomNode, getCanvasElement, getStyles } from './dom';
+import {
+  createNewDomBlockNode,
+  getBlockDomNode,
+  getBlockIdFromElement,
+  getCanvasElement,
+  getStyles,
+  removeDomBlocksAndArrows,
+} from './dom';
 import { Arrow, Block, Padding } from './types';
 import { computeNewBlock, getBlockChildren, isFirstBlock } from './utils';
 
@@ -206,4 +213,57 @@ function moveOffset(blocks: Block[]): Block[] {
     });
   }
   return newBlocks;
+}
+
+/*
+  Moving a child from one node to another
+*/
+export function moveChild(blocks: Block[], element: HTMLElement, parent: Block, padding: Padding): Block[] {
+  const canvas = getCanvasElement();
+
+  const newBlockNode = createNewDomBlockNode(element);
+  canvas.appendChild(newBlockNode);
+
+  const currentBlockNodeId = getBlockIdFromElement(element);
+  const blockChildren = getAllChildrenBlocks(blocks, currentBlockNodeId);
+  const blockChildrenIds = blockChildren.map((b) => b.id);
+  let newBlocks = blocks.filter((b) => b.id !== currentBlockNodeId && !blockChildrenIds.includes(b.id));
+
+  removeDomBlocksAndArrows([currentBlockNodeId]);
+
+  const newChildrenWidth = calculateChildrenWidth(newBlocks, parent.id, padding) + getStyles(newBlockNode).width;
+
+  newBlocks = rearrageChildren(newBlocks, parent, newChildrenWidth, padding);
+
+  newBlockNode.setAttribute('data-blockid', currentBlockNodeId.toString());
+
+  newBlocks.push(computeNewBlock(newBlockNode, parent.id));
+  newBlocks = newBlocks.concat(blockChildren);
+
+  const newBlock = newBlocks.find((a) => a.id === currentBlockNodeId);
+  const arrow: Arrow = {
+    x: newBlock.x - parent.x + 20,
+    y: padding.y,
+  };
+  drawArrow(newBlock, parent, arrow, padding);
+
+  newBlocks = recalculateChildWidth(newBlocks, parent, newChildrenWidth, padding);
+
+  newBlocks = cleanupEndBlocks(newBlocks);
+  newBlocks = repaint(newBlocks, padding);
+
+  moveOffset(newBlocks);
+  return newBlocks;
+}
+
+/*
+  Get all children of a block recursively
+*/
+function getAllChildrenBlocks(blocks: Block[], parent: number): Block[] {
+  const children = getBlockChildren(blocks, parent);
+  if (children.length === 0) {
+    return [];
+  } else {
+    return [...children, ...children.reduce((acc, child) => acc.concat(getAllChildrenBlocks(blocks, child.id)), [])];
+  }
 }

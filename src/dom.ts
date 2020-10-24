@@ -100,3 +100,10 @@ export function initDragListeners(
     false,
   );
 }
+
+export function removeDomBlocksAndArrows(blocks: number[]): void {
+  blocks.forEach((block) => {
+    getBlockDomNode(block).remove();
+    getArrowDomNode(block).remove();
+  });
+}

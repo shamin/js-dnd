@@ -39,6 +39,7 @@ body {
 
 .dragging {
   opacity: 0.5;
+  box-shadow: none;
 }
 
 .block {
